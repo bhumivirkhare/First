@@ -1,8 +1,12 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, send_from_directory
 import sqlite3
 import pandas as pd
+import os
 
 app = Flask(__name__, template_folder='templates')
+app.config['UPLOAD_FOLDER'] = 'uploads'
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
 DB = 'warehouse.db'
 
 def init_db():
@@ -13,7 +17,8 @@ def init_db():
                 name TEXT NOT NULL,
                 license_no TEXT NOT NULL,
                 province TEXT NOT NULL,
-                age INTEGER NOT NULL
+                age INTEGER NOT NULL,
+                document TEXT
             )
         ''')
 
@@ -23,12 +28,24 @@ def home():
 
 @app.route('/register', methods=['POST'])
 def register_driver():
-    data = request.get_json()
+    name = request.form.get('name')
+    license_no = request.form.get('license_no')
+    province = request.form.get('province')
+    age = request.form.get('age')
+
+    file = request.files.get('document')
+    filename = None
+    if file:
+        filename = f"{license_no}_{file.filename}"
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+
     with sqlite3.connect(DB) as conn:
         conn.execute('''
-            INSERT INTO truck_drivers (name, license_no, province, age)
-            VALUES (?, ?, ?, ?)
-        ''', (data['name'], data['license_no'], data['province'], data['age']))
+            INSERT INTO truck_drivers (name, license_no, province, age, document)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (name, license_no, province, age, filename))
+
     return jsonify({'message': 'Driver registered successfully'}), 201
 
 @app.route('/drivers', methods=['GET'])
@@ -42,6 +59,10 @@ def analytics():
     avg_age = df['age'].mean()
     by_province = df['province'].value_counts().to_dict()
     return jsonify({'average_age': avg_age, 'drivers_per_province': by_province})
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if __name__ == '__main__':
     init_db()
