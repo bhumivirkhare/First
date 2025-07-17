@@ -1,40 +1,117 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Warehouse Truck Driver Registration</title>
+    <title>Truck Driver Registry</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        input, select, button { padding: 8px; margin: 5px; }
-        table, th, td { border: 1px solid black; border-collapse: collapse; padding: 8px; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f4f7f9;
+            color: #333;
+            padding: 40px;
+        }
+
+        h1, h2 {
+            color: #222;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        form input, form select, form button {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        form button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        form button:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        table th, table td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table th {
+            background-color: #f2f2f2;
+        }
+
+        .analytics-box {
+            margin-top: 20px;
+            background: #e7f0f7;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .btn-secondary {
+            background-color: #008CBA;
+            color: white;
+            padding: 10px;
+            border: none;
+            margin-top: 10px;
+            border-radius: 6px;
+        }
+
+        .btn-secondary:hover {
+            background-color: #007bb5;
+        }
     </style>
 </head>
 <body>
-    <h2>Register Truck Driver</h2>
-    <form id="registerForm">
-        <input type="text" placeholder="Name" id="name" required>
-        <input type="text" placeholder="License No" id="license_no" required>
-        <select id="province" required>
-            <option value="">Select Province</option>
-            <option>Ontario</option>
-            <option>Quebec</option>
-            <option>British Columbia</option>
-            <option>Alberta</option>
-            <option>Manitoba</option>
-        </select>
-        <input type="number" placeholder="Age" id="age" required>
-        <button type="submit">Register</button>
-    </form>
+    <div class="container">
+        <h1>Warehouse Truck Driver Registry (Canada)</h1>
 
-    <h2>All Registered Drivers</h2>
-    <button onclick="loadDrivers()">Refresh List</button>
-    <table id="driverTable">
-        <thead><tr><th>ID</th><th>Name</th><th>License No</th><th>Province</th><th>Age</th></tr></thead>
-        <tbody></tbody>
-    </table>
+        <h2>Register Driver</h2>
+        <form id="registerForm">
+            <input type="text" placeholder="Name" id="name" required>
+            <input type="text" placeholder="License No" id="license_no" required>
+            <select id="province" required>
+                <option value="">Province</option>
+                <option>Ontario</option>
+                <option>Quebec</option>
+                <option>British Columbia</option>
+                <option>Alberta</option>
+                <option>Manitoba</option>
+            </select>
+            <input type="number" placeholder="Age" id="age" required>
+            <button type="submit">Register</button>
+        </form>
 
-    <h2>Analytics</h2>
-    <button onclick="loadAnalytics()">Show Analytics</button>
-    <div id="analyticsOutput"></div>
+        <h2>Registered Drivers</h2>
+        <button class="btn-secondary" onclick="loadDrivers()">Refresh List</button>
+        <table id="driverTable">
+            <thead>
+                <tr><th>ID</th><th>Name</th><th>License No</th><th>Province</th><th>Age</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <h2>Analytics</h2>
+        <button class="btn-secondary" onclick="loadAnalytics()">Show Analytics</button>
+        <div class="analytics-box" id="analyticsOutput"></div>
+    </div>
 
     <script>
         document.getElementById("registerForm").addEventListener("submit", async function(e) {
@@ -55,6 +132,7 @@
             const result = await res.json();
             alert(result.message);
             loadDrivers();
+            this.reset();
         });
 
         async function loadDrivers() {
@@ -85,8 +163,7 @@
             document.getElementById('analyticsOutput').innerHTML = html;
         }
 
-        // Load drivers on start
-        loadDrivers();
+        loadDrivers(); // auto-load on page open
     </script>
 </body>
 </html>
