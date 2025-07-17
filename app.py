@@ -1,12 +1,10 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import sqlite3
 import pandas as pd
 
 app = Flask(__name__, template_folder='templates')
-
 DB = 'warehouse.db'
 
-# Initialize DB
 def init_db():
     with sqlite3.connect(DB) as conn:
         conn.execute('''
@@ -19,7 +17,10 @@ def init_db():
             )
         ''')
 
-# Route to register a new driver
+@app.route('/')
+def home():
+    return render_template('index.html')
+
 @app.route('/register', methods=['POST'])
 def register_driver():
     data = request.get_json()
@@ -30,28 +31,17 @@ def register_driver():
         ''', (data['name'], data['license_no'], data['province'], data['age']))
     return jsonify({'message': 'Driver registered successfully'}), 201
 
-# Route to view all drivers
 @app.route('/drivers', methods=['GET'])
 def list_drivers():
     df = pd.read_sql('SELECT * FROM truck_drivers', sqlite3.connect(DB))
     return df.to_json(orient='records')
 
-# Basic analytics: average age, count by province
 @app.route('/analytics', methods=['GET'])
 def analytics():
     df = pd.read_sql('SELECT * FROM truck_drivers', sqlite3.connect(DB))
     avg_age = df['age'].mean()
     by_province = df['province'].value_counts().to_dict()
     return jsonify({'average_age': avg_age, 'drivers_per_province': by_province})
-
-
-from flask import render_template
-
-@app.route('/')
-def home():
-    return render_template('index.html')
-
-
 
 if __name__ == '__main__':
     init_db()
