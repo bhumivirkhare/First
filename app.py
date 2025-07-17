@@ -43,6 +43,15 @@ def analytics():
     by_province = df['province'].value_counts().to_dict()
     return jsonify({'average_age': avg_age, 'drivers_per_province': by_province})
 
+
+from flask import render_template
+
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
