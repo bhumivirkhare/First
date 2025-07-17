@@ -85,9 +85,9 @@
 
         <h2>Register Driver</h2>
         <form id="registerForm">
-            <input type="text" placeholder="Name" id="name" required>
-            <input type="text" placeholder="License No" id="license_no" required>
-            <select id="province" required>
+            <input type="text" name="name" placeholder="Name" required>
+            <input type="text" name="license_no" placeholder="License No" required>
+            <select name="province" required>
                 <option value="">Province</option>
                 <option>Ontario</option>
                 <option>Quebec</option>
@@ -95,7 +95,8 @@
                 <option>Alberta</option>
                 <option>Manitoba</option>
             </select>
-            <input type="number" placeholder="Age" id="age" required>
+            <input type="number" name="age" placeholder="Age" required>
+            <input type="file" name="document" accept=".pdf,.jpg,.png,.jpeg" required>
             <button type="submit">Register</button>
         </form>
 
@@ -103,7 +104,7 @@
         <button class="btn-secondary" onclick="loadDrivers()">Refresh List</button>
         <table id="driverTable">
             <thead>
-                <tr><th>ID</th><th>Name</th><th>License No</th><th>Province</th><th>Age</th></tr>
+                <tr><th>ID</th><th>Name</th><th>License No</th><th>Province</th><th>Age</th><th>Document</th></tr>
             </thead>
             <tbody></tbody>
         </table>
@@ -116,23 +117,18 @@
     <script>
         document.getElementById("registerForm").addEventListener("submit", async function(e) {
             e.preventDefault();
-            const data = {
-                name: document.getElementById("name").value,
-                license_no: document.getElementById("license_no").value,
-                province: document.getElementById("province").value,
-                age: parseInt(document.getElementById("age").value)
-            };
+            const form = e.target;
+            const formData = new FormData(form);
 
             const res = await fetch('/register', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+                body: formData
             });
 
             const result = await res.json();
             alert(result.message);
+            form.reset();
             loadDrivers();
-            this.reset();
         });
 
         async function loadDrivers() {
@@ -141,12 +137,14 @@
             const tbody = document.querySelector("#driverTable tbody");
             tbody.innerHTML = '';
             data.forEach(driver => {
+                const docLink = driver.document ? `<a href="/uploads/${driver.document}" target="_blank">Download</a>` : 'N/A';
                 tbody.innerHTML += `<tr>
                     <td>${driver.id}</td>
                     <td>${driver.name}</td>
                     <td>${driver.license_no}</td>
                     <td>${driver.province}</td>
                     <td>${driver.age}</td>
+                    <td>${docLink}</td>
                 </tr>`;
             });
         }
@@ -163,7 +161,7 @@
             document.getElementById('analyticsOutput').innerHTML = html;
         }
 
-        loadDrivers(); // auto-load on page open
+        loadDrivers(); // Auto-load data on page load
     </script>
 </body>
 </html>
