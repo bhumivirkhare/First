@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Warehouse Truck Driver Registration</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        input, select, button { padding: 8px; margin: 5px; }
+        table, th, td { border: 1px solid black; border-collapse: collapse; padding: 8px; }
+    </style>
+</head>
+<body>
+    <h2>Register Truck Driver</h2>
+    <form id="registerForm">
+        <input type="text" placeholder="Name" id="name" required>
+        <input type="text" placeholder="License No" id="license_no" required>
+        <select id="province" required>
+            <option value="">Select Province</option>
+            <option>Ontario</option>
+            <option>Quebec</option>
+            <option>British Columbia</option>
+            <option>Alberta</option>
+            <option>Manitoba</option>
+        </select>
+        <input type="number" placeholder="Age" id="age" required>
+        <button type="submit">Register</button>
+    </form>
+
+    <h2>All Registered Drivers</h2>
+    <button onclick="loadDrivers()">Refresh List</button>
+    <table id="driverTable">
+        <thead><tr><th>ID</th><th>Name</th><th>License No</th><th>Province</th><th>Age</th></tr></thead>
+        <tbody></tbody>
+    </table>
+
+    <h2>Analytics</h2>
+    <button onclick="loadAnalytics()">Show Analytics</button>
+    <div id="analyticsOutput"></div>
+
+    <script>
+        document.getElementById("registerForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById("name").value,
+                license_no: document.getElementById("license_no").value,
+                province: document.getElementById("province").value,
+                age: parseInt(document.getElementById("age").value)
+            };
+
+            const res = await fetch('/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await res.json();
+            alert(result.message);
+            loadDrivers();
+        });
+
+        async function loadDrivers() {
+            const res = await fetch('/drivers');
+            const data = await res.json();
+            const tbody = document.querySelector("#driverTable tbody");
+            tbody.innerHTML = '';
+            data.forEach(driver => {
+                tbody.innerHTML += `<tr>
+                    <td>${driver.id}</td>
+                    <td>${driver.name}</td>
+                    <td>${driver.license_no}</td>
+                    <td>${driver.province}</td>
+                    <td>${driver.age}</td>
+                </tr>`;
+            });
+        }
+
+        async function loadAnalytics() {
+            const res = await fetch('/analytics');
+            const data = await res.json();
+            let html = `<p><b>Average Age:</b> ${data.average_age.toFixed(1)}</p>`;
+            html += '<p><b>Drivers per Province:</b></p><ul>';
+            for (const [prov, count] of Object.entries(data.drivers_per_province)) {
+                html += `<li>${prov}: ${count}</li>`;
+            }
+            html += '</ul>';
+            document.getElementById('analyticsOutput').innerHTML = html;
+        }
+
+        // Load drivers on start
+        loadDrivers();
+    </script>
+</body>
+</html>
