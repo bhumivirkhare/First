@@ -2,7 +2,8 @@ from flask import Flask, request, jsonify
 import sqlite3
 import pandas as pd
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
+
 DB = 'warehouse.db'
 
 # Initialize DB
